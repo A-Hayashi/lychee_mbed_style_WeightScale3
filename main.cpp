@@ -1,79 +1,173 @@
 #include "mbed.h"
-#include "http_request.h"
-#include "ESP32Interface.h"
-#include "PS_PAD.h"
 
-ESP32Interface wifi(P5_3, P3_14, P7_1, P0_1);
+void draw_main();
+
+Thread draw_main_task(osPriorityNormal, 500 * 1024);
 Serial pc(USBTX, USBRX);
+I2C master(I2C_SDA, I2C_SCL);
 
-const char* ssid = "W04_78625678F45E";//書き換えてください
-const char* password = "6dqbfjgfyb6gi22";//書き換えてください
-
-void ChannelUpdate(int field1, int field2);
-Timer t;
+//int main()
+//{
+//    pc.printf("RUN\r\n");
+//    for(int i = 0; i < 128 ; i++) {
+//    	master.start();
+//        if(master.write(i << 1)) pc.printf("0x%x ACK \r\n",i); // Send command string
+//        master.stop();
+//    }
+//}
 
 int main() {
-	PS_PAD pad(P6_14, P6_15, P6_12, P3_9);
-
-    pc.baud(9600);
-
-    pc.printf("\nConnecting...\n");
-    int ret = wifi.connect(ssid, password, NSAPI_SECURITY_WPA_WPA2);
-    if (ret != 0) {
-    	pc.printf("\nConnection error\n");
-        return -1;
-    }
-    pc.printf("Success\n\n");
-    pc.printf("MAC: %s\n", wifi.get_mac_address());
-    pc.printf("IP: %s\n", wifi.get_ip_address());
-    pc.printf("Netmask: %s\n", wifi.get_netmask());
-    pc.printf("Gateway: %s\n", wifi.get_gateway());
-    pc.printf("RSSI: %d\n\n", wifi.get_rssi());
-
-	pad.init();
-	t.start();
-
-	while (1) {
-		pad.poll();
-		int field1 = pad.read(PS_PAD::ANALOG_RX)+128;
-		int field2 = pad.read(PS_PAD::ANALOG_LX)+128;
-
-		if(t.read() > 5){
-			pc.printf("field1: %d, field2: %d\n", field1, field2);
-			if(pad.read(PS_PAD::PAD_R1)){
-				t.reset();
-				t.start();
-				ChannelUpdate(pad.read(PS_PAD::ANALOG_RX)+128, pad.read(PS_PAD::ANALOG_LX)+128);
-			}
-		}
-	}
+	draw_main_task.start(&draw_main);
+	while (true)
+		;
+	return 0;
 }
 
+enum {
+	cmd_print = 0x01,
+	cmd_setCursor,
+	cmd_fillRect,
+	cmd_setTextSize,
+	cmd_setTextColor
+};
+
+typedef struct {
+  uint32_t stable;
+  float weight;
+} weight_t;
 
 
-void ChannelUpdate(int field1, int field2)
-{
-	char* thingSpeakUrl = "http://api.thingspeak.com/update";
-	char* thingSpeakKey = "DAUNON43Q966D9XS";
+const int key_addr = 0x10 << 1;
+const int servo_addr = 0x25 << 1;
+const int kaiten_addr = 0x15 << 1;
+const int led_addr = 0x20 << 1;
+const int weight_addr = 0x30 << 1;
 
-	char urlBuffer[256];
+void draw_main() {
+	char key_data[2] = { 0xff, 0xff };
+	char servo_cmd[4] = { 0x01, 0x01, 0, 90 };
+	char kaiten_cmd[2];
+	char led_cmd[100];
+	weight_t weights;
+	static uint8_t cnt = 0;
 
-	urlBuffer[0] = 0;
+	while (1) {
+		char *p = (char *)&weights;
+		master.read(weight_addr, p, 8);
 
-	sprintf(urlBuffer, "%s?key=%s&field1=%d&field2=%d", thingSpeakUrl, thingSpeakKey, field1, field2);
+		master.read(key_addr, key_data, 2);
+		pc.printf("%d, %d\n", key_data[0], key_data[1]);
 
-	pc.printf("Request to %s\r\n", urlBuffer);
-	pc.printf("\n----- HTTP GET request -----\n");
+		if (key_data[1] == true) {
+			switch (key_data[0]) {
+			case '0':
+				servo_cmd[2] = 0;
+				break;
+			case '1':
+				servo_cmd[2] = 90;
+				break;
+			case '2':
+				servo_cmd[2] = 180;
+				break;
+			case '*':
+				servo_cmd[3] = 10;
+				break;
+			case '#':
+				servo_cmd[3] = 90;
+				break;
+			}
+		}
 
-    HttpRequest* get_req = new HttpRequest(&wifi, HTTP_GET, urlBuffer);
+		if (key_data[0] == '3') {
+			if (key_data[1] == true) {
+				kaiten_cmd[0] = 0x01;
+				kaiten_cmd[1] = 50;
+			} else {
+				kaiten_cmd[0] = 0x01;
+				kaiten_cmd[1] = 0;
+			}
+		}
 
-    HttpResponse* get_res = get_req->send();
-    if (!get_res) {
-    	pc.printf("HttpRequest failed (error code %d)\n", get_req->get_error());
-    	return;
-    }
-    pc.printf("\n----- HTTP GET response -----\n");
+		if (key_data[0] == '4') {
+			if (key_data[1] == true) {
+				kaiten_cmd[0] = 0x02;
+				kaiten_cmd[1] = 1;
+			} else {
+				kaiten_cmd[0] = 0x02;
+				kaiten_cmd[1] = 0;
+			}
+		}
 
-    pc.printf("%s\n", get_res->get_body_as_string().c_str());
-    delete get_req;
+		if (cnt == 5) {
+			led_cmd[0] = cmd_fillRect;
+			led_cmd[1] = 0;
+			led_cmd[2] = 0;
+			led_cmd[3] = 64;
+			led_cmd[4] = 32;
+			led_cmd[5] = 0;
+			led_cmd[6] = 0;
+			led_cmd[7] = 0;
+			master.write(led_addr, led_cmd, 8);
+
+			led_cmd[0] = cmd_setCursor;
+			led_cmd[1] = 0;
+			led_cmd[2] = 0;
+			master.write(led_addr, led_cmd, 3);
+
+			led_cmd[0] = cmd_setTextColor;
+			led_cmd[1] = 0;
+			led_cmd[2] = 15;
+			led_cmd[3] = 0;
+			master.write(led_addr, led_cmd, 4);
+
+			led_cmd[0] = cmd_print;
+			char str[50] = "0123456789\nabcdefg\nhigklmn\nABCDEFG\n";
+			for (int i = 0; i < 50; i++) {
+				led_cmd[1 + i] = str[i];
+			}
+			master.write(led_addr, led_cmd, 51);
+		}
+		if (cnt == 9) {
+
+
+			led_cmd[0] = cmd_fillRect;
+			led_cmd[1] = 0;
+			led_cmd[2] = 0;
+			led_cmd[3] = 64;
+			led_cmd[4] = 32;
+			led_cmd[5] = 0;
+			led_cmd[6] = 0;
+			led_cmd[7] = 0;
+			master.write(led_addr, led_cmd, 8);
+
+			led_cmd[0] = cmd_setCursor;
+			led_cmd[1] = 0;
+			led_cmd[2] = 0;
+			master.write(led_addr, led_cmd, 3);
+
+			led_cmd[0] = cmd_setTextColor;
+			led_cmd[1] = 15;
+			led_cmd[2] = 0;
+			led_cmd[3] = 0;
+			master.write(led_addr, led_cmd, 4);
+
+			led_cmd[0] = cmd_print;
+			char str2[50];
+			sprintf(str2, "weight:\n%f kg", weights.weight);
+			for (int i = 0; i < 50; i++) {
+				led_cmd[1 + i] = str2[i];
+			}
+			master.write(led_addr, led_cmd, 51);
+		}
+		cnt++;
+		if (cnt > 10) {
+			cnt = 0;
+		}
+
+		master.write(servo_addr, servo_cmd, 4);
+		master.write(kaiten_addr, kaiten_cmd, 2);
+		pc.printf("%d, %d, %d, %d\n", servo_cmd[0], servo_cmd[1], servo_cmd[2],
+				servo_cmd[3]);
+		Thread::wait(500);
+	}
 }
