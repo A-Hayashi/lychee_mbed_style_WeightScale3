@@ -1,10 +1,14 @@
 #include "mbed.h"
+#include "Password.h"
 
-void draw_main();
+void com_main();
 
-Thread draw_main_task(osPriorityNormal, 500 * 1024);
+Thread com_main_task(osPriorityNormal, 500 * 1024);
 Serial pc(USBTX, USBRX);
 I2C master(I2C_SDA, I2C_SCL);
+
+Password password = Password( "1234" );
+
 
 //int main()
 //{
@@ -17,7 +21,7 @@ I2C master(I2C_SDA, I2C_SCL);
 //}
 
 int main() {
-	draw_main_task.start(&draw_main);
+	com_main_task.start(&com_main);
 	while (true)
 		;
 	return 0;
@@ -48,6 +52,9 @@ typedef struct {
 const int kaiten_addr = 0x15 << 1;
 const int led_addr = 0x20 << 1;
 const int servo_addr = 0x25 << 1;
+
+
+void keypadEvent(keymat_t *key_data);
 
 void cmd_servo(uint8_t angle, uint8_t speed) {
 	char servo_cmd[4] = { 0x01, 0x01, 0, 90 };
@@ -170,8 +177,7 @@ void cmd_print_text(char *str) {
 	master.write(led_addr, led_cmd, size + 1);
 }
 
-void draw_main() {
-
+void com_main() {
 	keymat_t key_data;
 	weight_t weights;
 	static uint8_t cnt = 0;
@@ -179,6 +185,9 @@ void draw_main() {
 	while (1) {
 		weights = get_weight();
 		key_data = get_key();
+
+		keypadEvent(&key_data);
+
 		pc.printf("%d, %d\n", key_data.key, key_data.state);
 
 		if (key_data.state == push) {
@@ -242,4 +251,29 @@ void draw_main() {
 
 		Thread::wait(500);
 	}
+}
+
+void checkPassword();
+
+
+void keypadEvent(keymat_t *key_data){
+  switch (key_data->state){
+    case push:
+    pc.printf("Pressed: ");
+	pc.printf("%s\n", key_data->key);
+
+	switch (key_data->key){
+	  case '*': checkPassword(); break;
+	  case '#': password.reset(); break;
+	  default: password.append(key_data->key);
+     }
+  }
+}
+
+void checkPassword(){
+  if (password.evaluate()){
+    pc.printf("Success");
+  }else{
+    pc.printf("Wrong");
+  }
 }
