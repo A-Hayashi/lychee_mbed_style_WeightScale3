@@ -1,7 +1,11 @@
 #include "mbed.h"
 
+typedef enum {
+	start = 0, ongoing = 1, determined = 3, waiting = 4, initial = 0xff
+} weight_stable;
+
 typedef struct {
-	uint32_t stable;
+	weight_stable stable;
 	float weight;
 } weight_t;
 
@@ -13,7 +17,6 @@ typedef struct {
 	char key;
 	key_state state;
 } keymat_t;
-
 
 void cmd_servo(uint8_t angle, uint8_t speed);
 

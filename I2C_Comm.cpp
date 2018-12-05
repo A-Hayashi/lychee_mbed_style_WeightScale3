@@ -9,7 +9,6 @@ enum {
 	cmd_setTextColor
 };
 
-
 static I2C master(I2C_SDA, I2C_SCL);
 
 static const int kaiten_addr = 0x15 << 1;
@@ -43,7 +42,6 @@ void cmd_lamp(bool lamp) {
 	master.write(kaiten_addr, kaiten_cmd, 2);
 }
 
-
 void cmd_kaiten_lamp(uint8_t duty, bool lamp) {
 	cmd_kaiten(duty);
 	cmd_lamp(lamp);
@@ -52,6 +50,7 @@ void cmd_kaiten_lamp(uint8_t duty, bool lamp) {
 weight_t get_weight(void) {
 	const int weight_addr = 0x30 << 1;
 	weight_t weights;
+
 	char *p = (char *) &weights;
 	master.read(weight_addr, p, 8);
 

@@ -14,6 +14,8 @@ DigitalIn lead_sw(D10);
 Timeout timeout1;
 EventQueue queue;
 
+float target_weight = 100;
+
 //int main()
 //{
 //    pc.printf("RUN\r\n");
@@ -28,16 +30,18 @@ int main() {
 	com_main_task.start(&com_main);
 	Thread eventThread;
 	eventThread.start(callback(&queue, &EventQueue::dispatch_forever));
-
 	wait(osWaitForever);
 	return 0;
 }
 
-void keypadEvent(keymat_t *key_data);
+void keypadEvent(keymat_t *key_data, weight_t *weights);
 
 void com_main() {
 	keymat_t key_data;
+
 	weight_t weights;
+	static weight_t weights_old;
+
 	bool door_open;
 	static bool door_open_old;
 
@@ -47,6 +51,15 @@ void com_main() {
 		weights = get_weight();
 		key_data = get_key();
 		door_open = lead_sw;
+
+		if (weights.stable != weights_old.stable) {
+			if (weights.stable == initial) {
+				pc.printf("stable: %d, weight: ---\n", weights.stable);
+			} else {
+				pc.printf("stable: %d, weight: %f\n", weights.stable, weights.weight);
+			}
+		}
+		weights_old = weights;
 
 		if (door_open_old != door_open) {
 			if (door_open == false) {
@@ -60,7 +73,7 @@ void com_main() {
 		}
 		door_open_old = door_open;
 
-		keypadEvent(&key_data);
+		keypadEvent(&key_data, &weights);
 
 		if (cnt == 5) {
 			cmd_clear_all();
@@ -89,10 +102,12 @@ void com_main() {
 	}
 }
 
-void checkPassword();
+void checkPassword(weight_t *weights);
+void unlock_success(void);
+void unlock_failed(void);
 void kaiten_stop();
 
-void keypadEvent(keymat_t *key_data) {
+void keypadEvent(keymat_t *key_data, weight_t *weights) {
 	switch (key_data->state) {
 	case push:
 		pc.printf("Pressed: ");
@@ -100,7 +115,7 @@ void keypadEvent(keymat_t *key_data) {
 
 		switch (key_data->key) {
 		case '*':
-			checkPassword();
+			checkPassword(weights);
 			password.reset();
 			break;
 		case '#':
@@ -112,15 +127,39 @@ void keypadEvent(keymat_t *key_data) {
 	}
 }
 
-void checkPassword() {
-	if (password.evaluate()) {
-		cmd_servo(180, 90);
-		pc.printf("Password is correct\n");
-	} else {
-		cmd_kaiten_lamp(50, true);
-		timeout1.attach(queue.event(&kaiten_stop), 5);
+void checkPassword(weight_t *weights) {
+	if(!password.evaluate()){
 		pc.printf("Password is incorrect\n");
+		unlock_failed();
+		return;
 	}
+
+	if (weights->stable == initial) {
+		pc.printf("Weight is initial\n");
+		unlock_failed();
+		return;
+	}
+
+	if (weights->weight < target_weight) {
+		pc.printf("Target weight achieved\n");
+		unlock_success();
+	} else {
+		pc.printf("Target weight unachieved\n");
+		unlock_failed();
+	}
+}
+
+void unlock_success(void)
+{
+	cmd_servo(180, 90);
+	pc.printf("Unlock success\n");
+}
+
+void unlock_failed(void)
+{
+	cmd_kaiten_lamp(50, true);
+	timeout1.attach(queue.event(&kaiten_stop), 5);
+	pc.printf("Unlock failed\n");
 }
 
 void kaiten_stop() {
