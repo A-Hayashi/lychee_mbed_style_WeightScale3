@@ -101,6 +101,7 @@ void keypadEvent(keymat_t *key_data) {
 		switch (key_data->key) {
 		case '*':
 			checkPassword();
+			password.reset();
 			break;
 		case '#':
 			password.reset();
