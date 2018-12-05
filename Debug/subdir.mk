@@ -4,18 +4,21 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../I2C_Comm.cpp \
 ../PS_PAD.cpp \
 ../Password.cpp \
 ../Weight.cpp \
 ../main.cpp 
 
 OBJS += \
+./I2C_Comm.o \
 ./PS_PAD.o \
 ./Password.o \
 ./Weight.o \
 ./main.o 
 
 CPP_DEPS += \
+./I2C_Comm.d \
 ./PS_PAD.d \
 ./Password.d \
 ./Weight.d \
