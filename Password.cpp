@@ -70,6 +70,15 @@ void Password::reset(){
 	guess[currentIndex] = STRING_TERMINATOR;
 }
 
+char* Password::getPassword(){
+	return target;
+}
+
+
+char* Password::getGuess(){
+	return guess;
+}
+
 //is the current guessed password equal to the target password?
 bool Password::evaluate(){ 
 	char pass = target[0];

@@ -31,7 +31,7 @@ Serial pc(USBTX, USBRX);
 Password password = Password("1234");
 EventQueue queue;
 
-float target_weight = 50;
+float target_weight = 100;
 
 int main() {
 	Thread com_main_task(osPriorityNormal, 500 * 1024);
@@ -73,7 +73,8 @@ static void com_main() {
 					cmd_print_text(str);
 
 				} else {
-					pc.printf("stable: %d, weight: %f\n", weights.stable, weights.weight);
+					pc.printf("stable: %d, weight: %f\n", weights.stable,
+							weights.weight);
 
 					sprintf(str, "NOW:%3.0fkg\n", weights.weight);
 					cmd_print_text(str);
@@ -97,7 +98,7 @@ static void com_main() {
 			door_open_old = door_open;
 		}
 
-		if(get_state()==LOCKED){
+		if (get_state() == LOCKED) {
 			keypadEvent(&key_data, &weights);
 		}
 
@@ -109,40 +110,37 @@ static void com_main() {
 
 		state_main();
 
-		Thread::wait(1000);
+		Thread::wait(300);
 	}
 }
 
 static void keypadEvent(keymat_t *key_data, weight_t *weights) {
+	char str[50];
+
 	switch (key_data->state) {
 	case push:
 		pc.printf("Pressed: ");
 		pc.printf("%c\n", key_data->key);
 
-//		char str[50];
-//		sprintf(str, "%c", key_data->key);
-//		cmd_print_text(str);
-
 		switch (key_data->key) {
 		case '*':
 			checkPassword(weights);
 			password.reset();
-
-//			cmd_clear_line(3);
-//			cmd_set_cursor(0, 24);
-//			cmd_set_text_color(0, 15, 0);
 			break;
 		case '#':
 			password.reset();
-
-//			cmd_clear_line(3);
-//			cmd_set_cursor(0, 24);
-//			cmd_set_text_color(0, 15, 0);
 			break;
 		default:
 			password.append(key_data->key);
 		}
 	}
+	char *guess = password.getGuess();
+
+	cmd_clear_line(2);
+	cmd_set_cursor(0, 16);
+	cmd_set_text_color(0, 15, 0);
+	sprintf(str, "PASS:%s\n", guess);
+	cmd_print_text(str);
 }
 
 static void checkPassword(weight_t *weights) {

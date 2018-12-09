@@ -19,8 +19,8 @@ public:
 	void reset();
 	bool evaluate();
 	
-	//char* getPassword();
-	//char* getGuess();
+	char* getPassword();
+	char* getGuess();
 	
 	//operators
 	Password &operator=(char* pass);
