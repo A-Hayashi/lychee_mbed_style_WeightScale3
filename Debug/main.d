@@ -224,7 +224,7 @@ main.o: ../main.cpp \
  C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platform/Callback.h \
  C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platform/FunctionPointer.h \
  C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platform/ScopedLock.h \
- ../Password.h ../I2C_Comm.h
+ ../Password.h ../I2C_Comm.h ../StateMachine.h
 
 C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed_config.h:
 
@@ -679,3 +679,5 @@ C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platf
 ../Password.h:
 
 ../I2C_Comm.h:
+
+../StateMachine.h:

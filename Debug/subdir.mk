@@ -7,6 +7,7 @@ CPP_SRCS += \
 ../I2C_Comm.cpp \
 ../PS_PAD.cpp \
 ../Password.cpp \
+../StateMachine.cpp \
 ../Weight.cpp \
 ../main.cpp 
 
@@ -14,6 +15,7 @@ OBJS += \
 ./I2C_Comm.o \
 ./PS_PAD.o \
 ./Password.o \
+./StateMachine.o \
 ./Weight.o \
 ./main.o 
 
@@ -21,6 +23,7 @@ CPP_DEPS += \
 ./I2C_Comm.d \
 ./PS_PAD.d \
 ./Password.d \
+./StateMachine.d \
 ./Weight.d \
 ./main.d 
 
