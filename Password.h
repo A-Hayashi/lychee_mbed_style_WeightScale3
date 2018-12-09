@@ -29,7 +29,7 @@ public:
 	Password &operator<<(char character);
 	
 private:
-	char* target;
+	char target[ MAX_PASSWORD_LENGTH ];
 	char guess[ MAX_PASSWORD_LENGTH ];
 	byte currentIndex;
 };

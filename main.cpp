@@ -2,6 +2,8 @@
 #include "Password.h"
 #include "I2C_Comm.h"
 #include "StateMachine.h"
+#include <stdio.h>
+#include <string>
 
 static void INIT_init();
 static void INIT_do();
@@ -18,6 +20,7 @@ static void SETTING_end();
 
 static void com_main();
 static void keypadEvent(keymat_t *key_data, weight_t *weights);
+static void keypadEvent2(keymat_t *key_data, weight_t *weights);
 static void checkPassword(weight_t *weights);
 static void unlock_failed(uint8_t pattern);
 static void kaiten_stop();
@@ -45,21 +48,26 @@ int main() {
 
 static void com_main() {
 	state_init(state_function, 4);
-
+	char str[50];
 	DigitalIn lead_sw(D10);
-	bool door_open = lead_sw;
 
+	bool door_open = lead_sw;
 	if (door_open == false) {
 		set_state(LOCKED);
 	} else {
 		set_state(UNLOCKED);
 	}
 
+	cmd_set_line(2);
+	cmd_set_text_color(0, 15, 0);
+	sprintf(str, "PASS:\n");
+	cmd_print_text(str);
+
 	while (1) {
 		door_open = lead_sw;
 		weight_t weights = get_weight();
 		keymat_t key_data = get_key();
-		char str[50];
+
 		{
 			static weight_t weights_old;
 			if (weights.stable != weights_old.stable) {
@@ -67,14 +75,10 @@ static void com_main() {
 				cmd_set_text_color(0, 15, 0);
 				if (weights.stable == initial) {
 					pc.printf("stable: %d, weight: ---\n", weights.stable);
-
 					sprintf(str, "NOW:---kg\n");
 					cmd_print_text(str);
-
 				} else {
-					pc.printf("stable: %d, weight: %f\n", weights.stable,
-							weights.weight);
-
+					pc.printf("stable: %d, weight: %f\n", weights.stable, weights.weight);
 					sprintf(str, "NOW:%3.0fkg\n", weights.weight);
 					cmd_print_text(str);
 				}
@@ -101,10 +105,18 @@ static void com_main() {
 			keypadEvent(&key_data, &weights);
 		}
 
-		cmd_set_line(0);
-		cmd_set_text_color(0, 15, 0);
-		sprintf(str, "GOAL:%3.0fkg\n", target_weight);
-		cmd_print_text(str);
+		{
+			int target_weight_int = target_weight;
+			static int target_weight_old;
+
+			if(target_weight_int != target_weight_old){
+				cmd_set_line(0);
+				cmd_set_text_color(0, 15, 0);
+				sprintf(str, "GOAL:%3.0fkg\n", target_weight);
+				cmd_print_text(str);
+			}
+			target_weight_old = target_weight_int;
+		}
 
 		state_main();
 
@@ -114,7 +126,7 @@ static void com_main() {
 
 static void keypadEvent(keymat_t *key_data, weight_t *weights) {
 	char str[50];
-
+	char *guess2;
 	switch (key_data->state) {
 	case push:
 		pc.printf("Pressed: ");
@@ -122,7 +134,18 @@ static void keypadEvent(keymat_t *key_data, weight_t *weights) {
 
 		switch (key_data->key) {
 		case '*':
-			checkPassword(weights);
+			guess2 = password.getGuess();
+			if(guess2[0]=='0' && guess2[1]=='0'){
+				target_weight = atoi(&guess2[2]);
+				pc.printf("Weight Set: %3.1f\n", target_weight);
+			}else if(guess2[0]=='0'){
+				password.set(&guess2[1]);
+				pc.printf("Password Set: %s\n", password.getPassword());
+			}else{
+				pc.printf("Guess Get: %s\n", password.getGuess());
+				pc.printf("Password Get: %s\n", password.getPassword());
+				checkPassword(weights);
+			}
 			password.reset();
 			break;
 		case '#':
@@ -130,14 +153,16 @@ static void keypadEvent(keymat_t *key_data, weight_t *weights) {
 			break;
 		default:
 			password.append(key_data->key);
+			break;
 		}
-	}
-	char *guess = password.getGuess();
 
-	cmd_set_line(2);
-	cmd_set_text_color(0, 15, 0);
-	sprintf(str, "PASS:%s\n", guess);
-	cmd_print_text(str);
+		char *guess = password.getGuess();
+		cmd_set_line(2);
+		cmd_set_text_color(0, 15, 0);
+		sprintf(str, "PASS:%s\n", guess);
+		cmd_print_text(str);
+	}
+
 }
 
 static void checkPassword(weight_t *weights) {
@@ -192,7 +217,7 @@ static void unlock_failed(uint8_t pattern) {
 
 static void kaiten_stop() {
 	char str[50];
-	pc.printf("LOCKED_init\n");
+	pc.printf("kaiten_stop\n");
 
 	cmd_kaiten_lamp(0, false);
 
@@ -207,7 +232,7 @@ static void INIT_init() {
 }
 
 static void INIT_do() {
-	pc.printf("INIT_do\n");
+//	pc.printf("INIT_do\n");
 }
 
 static void INIT_end() {
@@ -228,7 +253,7 @@ static void LOCKED_init() {
 }
 
 static void LOCKED_do() {
-	pc.printf("LOCKED_do\n");
+//	pc.printf("LOCKED_do\n");
 }
 
 static void LOCKED_end() {
@@ -250,7 +275,7 @@ static void UNLOCKED_init() {
 }
 
 static void UNLOCKED_do() {
-	pc.printf("UNLOCKED_do\n");
+//	pc.printf("UNLOCKED_do\n");
 }
 
 static void UNLOCKED_end() {
@@ -262,7 +287,7 @@ static void SETTING_init() {
 }
 
 static void SETTING_do() {
-	pc.printf("SETTING_do\n");
+//	pc.printf("SETTING_do\n");
 }
 
 static void SETTING_end() {

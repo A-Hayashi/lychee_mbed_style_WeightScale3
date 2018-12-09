@@ -40,7 +40,7 @@ Password::Password(char* pass){
 
 //set the password
 void Password::set(char* pass){
-	target = pass;
+	strcpy(target, pass);
 }
 
 //evaluate a string, is it equal to the password?
