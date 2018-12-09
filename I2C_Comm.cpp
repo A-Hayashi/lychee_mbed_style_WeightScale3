@@ -118,6 +118,16 @@ void cmd_set_cursor(uint8_t x, uint8_t y) {
 	master.write(led_addr, led_cmd, 3);
 }
 
+void cmd_set_line(uint8_t line) {
+	char led_cmd[3];
+
+	cmd_clear_line(line);
+	led_cmd[0] = cmd_setCursor;
+	led_cmd[1] = 0;
+	led_cmd[2] = line * 8;
+	master.write(led_addr, led_cmd, 3);
+}
+
 void cmd_set_text_color(uint8_t r, uint8_t g, uint8_t b) {
 	char led_cmd[4];
 

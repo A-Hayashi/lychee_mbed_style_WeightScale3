@@ -31,5 +31,6 @@ keymat_t get_key(void);
 void cmd_clear_line(uint8_t line);
 void cmd_clear_all(void);
 void cmd_set_cursor(uint8_t x, uint8_t y);
+void cmd_set_line(uint8_t line);
 void cmd_set_text_color(uint8_t r, uint8_t g, uint8_t b);
 void cmd_print_text(char *str);

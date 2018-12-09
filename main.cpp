@@ -63,8 +63,7 @@ static void com_main() {
 		{
 			static weight_t weights_old;
 			if (weights.stable != weights_old.stable) {
-				cmd_clear_line(1);
-				cmd_set_cursor(0, 8);
+				cmd_set_line(1);
 				cmd_set_text_color(0, 15, 0);
 				if (weights.stable == initial) {
 					pc.printf("stable: %d, weight: ---\n", weights.stable);
@@ -102,8 +101,7 @@ static void com_main() {
 			keypadEvent(&key_data, &weights);
 		}
 
-		cmd_clear_line(0);
-		cmd_set_cursor(0, 0);
+		cmd_set_line(0);
 		cmd_set_text_color(0, 15, 0);
 		sprintf(str, "GOAL:%3.0fkg\n", target_weight);
 		cmd_print_text(str);
@@ -136,8 +134,7 @@ static void keypadEvent(keymat_t *key_data, weight_t *weights) {
 	}
 	char *guess = password.getGuess();
 
-	cmd_clear_line(2);
-	cmd_set_cursor(0, 16);
+	cmd_set_line(2);
 	cmd_set_text_color(0, 15, 0);
 	sprintf(str, "PASS:%s\n", guess);
 	cmd_print_text(str);
@@ -167,8 +164,7 @@ static void unlock_failed(uint8_t pattern) {
 	cmd_kaiten_lamp(50, true);
 	timeout1.attach(queue.event(&kaiten_stop), 5);
 
-	cmd_clear_line(3);
-	cmd_set_cursor(0, 24);
+	cmd_set_line(3);
 	cmd_set_text_color(0, 15, 0);
 
 	switch (pattern) {
@@ -200,8 +196,7 @@ static void kaiten_stop() {
 
 	cmd_kaiten_lamp(0, false);
 
-	cmd_clear_line(3);
-	cmd_set_cursor(0, 24);
+	cmd_set_line(3);
 	cmd_set_text_color(0, 15, 0);
 	sprintf(str, "LOCKED\n");
 	cmd_print_text(str);
@@ -226,8 +221,7 @@ static void LOCKED_init() {
 	cmd_kaiten_lamp(0, false);
 	cmd_servo(0, 90);
 
-	cmd_clear_line(3);
-	cmd_set_cursor(0, 24);
+	cmd_set_line(3);
 	cmd_set_text_color(0, 15, 0);
 	sprintf(str, "LOCKED\n");
 	cmd_print_text(str);
@@ -248,8 +242,8 @@ static void UNLOCKED_init() {
 	cmd_servo(180, 90);
 
 	pc.printf("Target weight achieved\n");
-	cmd_clear_line(3);
-	cmd_set_cursor(0, 24);
+
+	cmd_set_line(3);
 	cmd_set_text_color(0, 15, 0);
 	sprintf(str, "UNLOCKED\n");
 	cmd_print_text(str);
