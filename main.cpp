@@ -20,7 +20,6 @@ static void SETTING_end();
 
 static void com_main();
 static void keypadEvent(keymat_t *key_data, weight_t *weights);
-static void keypadEvent2(keymat_t *key_data, weight_t *weights);
 static void checkPassword(weight_t *weights);
 static void unlock_failed(uint8_t pattern);
 static void kaiten_stop();
@@ -78,7 +77,8 @@ static void com_main() {
 					sprintf(str, "NOW:---kg\n");
 					cmd_print_text(str);
 				} else {
-					pc.printf("stable: %d, weight: %f\n", weights.stable, weights.weight);
+					pc.printf("stable: %d, weight: %f\n", weights.stable,
+							weights.weight);
 					sprintf(str, "NOW:%3.0fkg\n", weights.weight);
 					cmd_print_text(str);
 				}
@@ -109,7 +109,7 @@ static void com_main() {
 			int target_weight_int = target_weight;
 			static int target_weight_old;
 
-			if(target_weight_int != target_weight_old){
+			if (target_weight_int != target_weight_old) {
 				cmd_set_line(0);
 				cmd_set_text_color(0, 15, 0);
 				sprintf(str, "GOAL:%3.0fkg\n", target_weight);
@@ -135,13 +135,13 @@ static void keypadEvent(keymat_t *key_data, weight_t *weights) {
 		switch (key_data->key) {
 		case '*':
 			guess2 = password.getGuess();
-			if(guess2[0]=='0' && guess2[1]=='0'){
+			if (guess2[0] == '0' && guess2[1] == '0') {
 				target_weight = atoi(&guess2[2]);
 				pc.printf("Weight Set: %3.1f\n", target_weight);
-			}else if(guess2[0]=='0'){
+			} else if (guess2[0] == '0') {
 				password.set(&guess2[1]);
 				pc.printf("Password Set: %s\n", password.getPassword());
-			}else{
+			} else {
 				pc.printf("Guess Get: %s\n", password.getGuess());
 				pc.printf("Password Get: %s\n", password.getPassword());
 				checkPassword(weights);
@@ -244,7 +244,7 @@ static void LOCKED_init() {
 	pc.printf("LOCKED_init\n");
 
 	cmd_kaiten_lamp(0, false);
-	cmd_servo(0, 90);
+	cmd_servo(150, 10);
 
 	cmd_set_line(3);
 	cmd_set_text_color(0, 15, 0);
@@ -264,7 +264,7 @@ static void UNLOCKED_init() {
 	char str[50];
 	pc.printf("UNLOCKED_init\n");
 
-	cmd_servo(180, 90);
+	cmd_servo(70, 10);
 
 	pc.printf("Target weight achieved\n");
 
