@@ -2,6 +2,7 @@
 #include "Password.h"
 #include "I2C_Comm.h"
 #include "StateMachine.h"
+#include "ThingSpeak.h"
 #include <stdio.h>
 #include <string>
 
@@ -47,6 +48,7 @@ int main() {
 
 static void com_main() {
 	state_init(state_function, 4);
+	wifi_init();
 	char str[50];
 	DigitalIn lead_sw(D10);
 
@@ -81,6 +83,15 @@ static void com_main() {
 							weights.weight);
 					sprintf(str, "NOW:%3.0fkg\n", weights.weight);
 					cmd_print_text(str);
+
+					if (weights.stable == determined){
+						ChannelUpdate(weights.weight, target_weight);
+						if(weights.weight<target_weight){
+							NotifyDietAchieved(weights.weight, target_weight);
+						}else{
+							NotifyDietNotAchieved(weights.weight, target_weight, weights.weight-target_weight);
+						}
+					}
 				}
 			}
 			weights_old = weights;
@@ -107,13 +118,14 @@ static void com_main() {
 
 		{
 			int target_weight_int = target_weight;
-			static int target_weight_old;
+			static int target_weight_old = 100;
 
 			if (target_weight_int != target_weight_old) {
 				cmd_set_line(0);
 				cmd_set_text_color(0, 15, 0);
 				sprintf(str, "GOAL:%3.0fkg\n", target_weight);
 				cmd_print_text(str);
+				NotifyChangeTarget(target_weight_old, target_weight_int);
 			}
 			target_weight_old = target_weight_int;
 		}
@@ -198,6 +210,7 @@ static void unlock_failed(uint8_t pattern) {
 
 		sprintf(str, "INCORRECT\n");
 		cmd_print_text(str);
+		NotifyUnlockFailedInvalidPass();
 		break;
 	case 1:
 		pc.printf("Weight is initial\n");
@@ -210,6 +223,7 @@ static void unlock_failed(uint8_t pattern) {
 
 		sprintf(str, "DO DIET\n");
 		cmd_print_text(str);
+		NotifyUnlockFailedDoDiet();
 		break;
 	}
 	pc.printf("Unlock failed\n");
@@ -250,6 +264,7 @@ static void LOCKED_init() {
 	cmd_set_text_color(0, 15, 0);
 	sprintf(str, "LOCKED\n");
 	cmd_print_text(str);
+	NotifyLocked();
 }
 
 static void LOCKED_do() {
@@ -272,6 +287,7 @@ static void UNLOCKED_init() {
 	cmd_set_text_color(0, 15, 0);
 	sprintf(str, "UNLOCKED\n");
 	cmd_print_text(str);
+	NotifyUnlocked();
 }
 
 static void UNLOCKED_do() {

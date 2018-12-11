@@ -8,6 +8,7 @@ CPP_SRCS += \
 ../PS_PAD.cpp \
 ../Password.cpp \
 ../StateMachine.cpp \
+../ThingSpeak.cpp \
 ../Weight.cpp \
 ../main.cpp 
 
@@ -16,6 +17,7 @@ OBJS += \
 ./PS_PAD.o \
 ./Password.o \
 ./StateMachine.o \
+./ThingSpeak.o \
 ./Weight.o \
 ./main.o 
 
@@ -24,6 +26,7 @@ CPP_DEPS += \
 ./PS_PAD.d \
 ./Password.d \
 ./StateMachine.d \
+./ThingSpeak.d \
 ./Weight.d \
 ./main.d 
 
