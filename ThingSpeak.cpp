@@ -2,6 +2,8 @@
 #include "http_request.h"
 #include "ESP32Interface.h"
 
+#define NO_NETWORK
+
 static ESP32Interface wifi(P5_3, P3_14, P7_1, P0_1);
 static Serial pc(USBTX, USBRX);
 
@@ -9,6 +11,7 @@ static const char* ssid = "W04_78625678F45E";//書き換えてください
 static const char* password = "6dqbfjgfyb6gi22";//書き換えてください
 
 int wifi_init() {
+#ifndef NO_NETWORK
     pc.printf("\nConnecting...\n");
     int ret = wifi.connect(ssid, password, NSAPI_SECURITY_WPA_WPA2);
     if (ret != 0) {
@@ -21,12 +24,13 @@ int wifi_init() {
     pc.printf("Netmask: %s\n", wifi.get_netmask());
     pc.printf("Gateway: %s\n", wifi.get_gateway());
     pc.printf("RSSI: %d\n\n", wifi.get_rssi());
-
+#endif
     return 0;
 }
 
 void ChannelUpdate(float field1, float field2)
 {
+#ifndef NO_NETWORK
 	char* thingSpeakUrl = "http://api.thingspeak.com/update";
 	char* thingSpeakKey = "DAUNON43Q966D9XS";
 
@@ -50,6 +54,7 @@ void ChannelUpdate(float field1, float field2)
 
     pc.printf("%s\n", get_res->get_body_as_string().c_str());
     delete get_req;
+#endif
 }
 
 
@@ -61,6 +66,7 @@ char *event[7] = {"NotifyDietAchieved","NotifyDietNotAchieved","NotifyUnlockFail
 
 void NotifyDietAchieved(float weight, float target)
 {
+#ifndef NO_NETWORK
 	char urlBuffer[256];
 
 	urlBuffer[0] = 0;
@@ -81,10 +87,12 @@ void NotifyDietAchieved(float weight, float target)
 
     pc.printf("%s\n", get_res->get_body_as_string().c_str());
     delete get_req;
+#endif
 }
 
 void NotifyDietNotAchieved(float weight, float target, float diff)
 {
+#ifndef NO_NETWORK
 	char urlBuffer[256];
 
 	urlBuffer[0] = 0;
@@ -105,12 +113,14 @@ void NotifyDietNotAchieved(float weight, float target, float diff)
 
     pc.printf("%s\n", get_res->get_body_as_string().c_str());
     delete get_req;
+#endif
 }
 
 
 
 void NotifyUnlockFailedInvalidPass(void)
 {
+#ifndef NO_NETWORK
 	char urlBuffer[256];
 
 	urlBuffer[0] = 0;
@@ -131,11 +141,13 @@ void NotifyUnlockFailedInvalidPass(void)
 
     pc.printf("%s\n", get_res->get_body_as_string().c_str());
     delete get_req;
+#endif
 }
 
 
 void NotifyUnlockFailedDoDiet(void)
 {
+#ifndef NO_NETWORK
 	char urlBuffer[256];
 
 	urlBuffer[0] = 0;
@@ -156,12 +168,14 @@ void NotifyUnlockFailedDoDiet(void)
 
     pc.printf("%s\n", get_res->get_body_as_string().c_str());
     delete get_req;
+#endif
 }
 
 
 
 void NotifyChangeTarget(int old_target, int new_target)
 {
+#ifndef NO_NETWORK
 	char urlBuffer[256];
 
 	urlBuffer[0] = 0;
@@ -182,10 +196,12 @@ void NotifyChangeTarget(int old_target, int new_target)
 
     pc.printf("%s\n", get_res->get_body_as_string().c_str());
     delete get_req;
+#endif
 }
 
 void NotifyLocked(void)
 {
+#ifndef NO_NETWORK
 	char urlBuffer[256];
 
 	urlBuffer[0] = 0;
@@ -206,10 +222,12 @@ void NotifyLocked(void)
 
     pc.printf("%s\n", get_res->get_body_as_string().c_str());
     delete get_req;
+#endif
 }
 
 void NotifyUnlocked(void)
 {
+#ifndef NO_NETWORK
 	char urlBuffer[256];
 
 	urlBuffer[0] = 0;
@@ -230,4 +248,5 @@ void NotifyUnlocked(void)
 
     pc.printf("%s\n", get_res->get_body_as_string().c_str());
     delete get_req;
+#endif
 }
