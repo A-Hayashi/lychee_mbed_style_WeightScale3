@@ -4,6 +4,8 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../Adafruit_GFX.cpp \
+../Adafruit_SSD1306.cpp \
 ../I2C_Comm.cpp \
 ../PS_PAD.cpp \
 ../Password.cpp \
@@ -13,6 +15,8 @@ CPP_SRCS += \
 ../main.cpp 
 
 OBJS += \
+./Adafruit_GFX.o \
+./Adafruit_SSD1306.o \
 ./I2C_Comm.o \
 ./PS_PAD.o \
 ./Password.o \
@@ -22,6 +26,8 @@ OBJS += \
 ./main.o 
 
 CPP_DEPS += \
+./Adafruit_GFX.d \
+./Adafruit_SSD1306.d \
 ./I2C_Comm.d \
 ./PS_PAD.d \
 ./Password.d \

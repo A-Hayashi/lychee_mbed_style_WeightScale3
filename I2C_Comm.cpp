@@ -1,6 +1,7 @@
 #include "mbed.h"
 #include "I2C_Comm.h"
 
+
 enum {
 	cmd_print = 0x01,
 	cmd_setCursor,
@@ -14,6 +15,20 @@ static I2C master(I2C_SDA, I2C_SCL);
 static const int kaiten_addr = 0x15 << 1;
 static const int led_addr = 0x20 << 1;
 static const int servo_addr = 0x25 << 1;
+
+// OLED制御クラスのインスタンス化
+static uint8_t i2cAddress = SSD_I2C_ADDRESS << 1;
+static uint8_t rawHeight = 64;
+static uint8_t rawWidth = 128;
+Adafruit_SSD1306_I2c oled(master, D10, i2cAddress, rawHeight, rawWidth);
+
+void oled_print(std::string str){
+    for(size_t i=0; i<str.size() ;i++){
+        oled._putc(str[i]);
+    }
+    // 表示を更新
+    oled.display();
+}
 
 void cmd_servo(uint8_t angle, uint8_t speed) {
 	char servo_cmd[4] = { 0x01, 0x01, 0, 90 };

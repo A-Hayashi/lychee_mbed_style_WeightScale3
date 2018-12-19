@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include <string>
 
+
+
+
 static void INIT_init();
 static void INIT_do();
 static void INIT_end();
@@ -31,6 +34,7 @@ static state_func_t state_function[4] = { { INIT_init, INIT_do, INIT_end }, {
 
 Serial pc(USBTX, USBRX);
 
+#define pc oled
 Password password = Password("1234");
 EventQueue queue;
 
@@ -131,7 +135,7 @@ static void com_main() {
 		}
 
 		state_main();
-
+		oled.display();
 		Thread::wait(300);
 	}
 }
@@ -310,6 +314,8 @@ static void SETTING_end() {
 	pc.printf("SETTING_end\n");
 }
 
+
+//I2C master(I2C_SDA, I2C_SCL);
 //int main()
 //{
 //    pc.printf("RUN\r\n");

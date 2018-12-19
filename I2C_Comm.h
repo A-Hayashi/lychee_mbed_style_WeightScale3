@@ -1,4 +1,7 @@
 #include "mbed.h"
+#include "Adafruit_SSD1306.h"
+#include <stdio.h>
+#include <string>
 
 typedef enum {
 	start = 0, ongoing = 1, determined = 3, waiting = 4, initial = 0xff
@@ -18,6 +21,8 @@ typedef struct {
 	key_state state;
 } keymat_t;
 
+extern Adafruit_SSD1306_I2c oled;
+void oled_print(std::string str);
 void cmd_servo(uint8_t angle, uint8_t speed);
 
 void cmd_kaiten(uint8_t duty);
