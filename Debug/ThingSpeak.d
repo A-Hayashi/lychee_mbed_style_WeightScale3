@@ -233,7 +233,9 @@ ThingSpeak.o: ../ThingSpeak.cpp \
  C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-gr-libs/components/WIFI/esp32-driver/ESP32Interface.h \
  C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-gr-libs/components/WIFI/esp32-driver/ESP32Stack.h \
  C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-gr-libs/components/WIFI/esp32-driver/ESP32/ESP32.h \
- C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platform/ATCmdParser.h
+ C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platform/ATCmdParser.h \
+ ../PrintfWrapper.h ../Adafruit_SSD1306.h ../Adafruit_GFX.h \
+ ../Adafruit_GFX_Config.h
 
 C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed_config.h:
 
@@ -704,3 +706,11 @@ C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-gr-libs/
 C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-gr-libs/components/WIFI/esp32-driver/ESP32/ESP32.h:
 
 C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platform/ATCmdParser.h:
+
+../PrintfWrapper.h:
+
+../Adafruit_SSD1306.h:
+
+../Adafruit_GFX.h:
+
+../Adafruit_GFX_Config.h:

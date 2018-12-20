@@ -1,7 +1,6 @@
 #include "Weight.h"
 #include "mbed.h"
-
-static Serial pc(USBTX, USBRX);
+#include "PrintfWrapper.h"
 
 #define TIMEOUT_US 30000
 
@@ -47,22 +46,22 @@ static void eee(uint32_t bh, uint32_t bl) {
 
 	char s[64];
 	itob(s, 2, (unsigned long long int) stable);
-	pc.printf(s);
-	pc.printf(" ");
+	printf2(s);
+	printf2(" ");
 
 	itob(s, 32, bh);
-	pc.printf(s);
-	pc.printf(" ");
+	printf2(s);
+	printf2(" ");
 
 	itob(s, 32, bl);
-	pc.printf(s);
-	pc.printf("\n");
+	printf2(s);
+	printf2("\n");
 
 	if (stable == 0x00) {
 	} else if (stable == 0x01) {
 	} else if (stable == 0x03) {
 		float weight = (bh & 0xffff) / (float) 10;
-		pc.printf("%5.2f\t\n", weight);
+		printf2("%5.2f\t\n", weight);
 	} else {
 	}
 }
@@ -115,7 +114,7 @@ static void fall() {
 Thread eventThread;
 void weight_init() {
 	eventThread.start(callback(&queue, &EventQueue::dispatch_forever));
-	pc.printf("start\n");
+	printf2("start\n");
 	p.mode(PullNone);
 	p.rise(queue.event(rise));
 

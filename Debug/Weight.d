@@ -224,7 +224,9 @@ Weight.o: ../Weight.cpp \
  C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platform/mbed_stats.h \
  C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platform/Callback.h \
  C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platform/FunctionPointer.h \
- C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platform/ScopedLock.h
+ C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platform/ScopedLock.h \
+ ../PrintfWrapper.h ../Adafruit_SSD1306.h ../Adafruit_GFX.h \
+ ../Adafruit_GFX_Config.h
 
 C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed_config.h:
 
@@ -677,3 +679,11 @@ C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platf
 C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platform/FunctionPointer.h:
 
 C:/Users/Akinori/e2_studio/workspace/lychee_mbed_style_WeightScale/mbed-os/platform/ScopedLock.h:
+
+../PrintfWrapper.h:
+
+../Adafruit_SSD1306.h:
+
+../Adafruit_GFX.h:
+
+../Adafruit_GFX_Config.h:

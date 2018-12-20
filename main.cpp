@@ -24,25 +24,19 @@ static void checkPassword(weight_t *weights);
 static void unlock_failed(uint8_t pattern);
 static void kaiten_stop();
 
-static state_func_t state_function[4] = { { INIT_init, INIT_do, INIT_end }, {
-		LOCKED_init, LOCKED_do, LOCKED_end }, { UNLOCKED_init, UNLOCKED_do,
-		UNLOCKED_end }, { SETTING_init, SETTING_do, SETTING_end }, };
+static state_func_t state_function[4] = {
+	{INIT_init, INIT_do, INIT_end },
+	{LOCKED_init, LOCKED_do, LOCKED_end },
+	{UNLOCKED_init, UNLOCKED_do, UNLOCKED_end },
+	{SETTING_init, SETTING_do, SETTING_end },
+};
 
 Password password = Password("1234");
 EventQueue queue;
-static Serial pc(USBTX, USBRX);
 float target_weight = 100;
 
 int main() {
 	printf2("start\n");
-	while (true) {
-		printf2("%s", "1aaabbbccc\n");
-		printf2("%s", "2aaabbbccc\n");
-		printf2("%s", "3aaabbbccc\n");
-		printf2("%s", "4aaabbbccc\n");
-		printf2("%s", "5aaabbbccc\n");
-		printf2("%s", "6aaabbbccc\n");
-	}
 	Thread com_main_task(osPriorityNormal, 500 * 1024);
 
 	com_main_task.start(&com_main);
@@ -74,18 +68,17 @@ static void com_main() {
 		door_open = lead_sw;
 		weight_t weights = get_weight();
 		keymat_t key_data = get_key();
-
 		{
 			static weight_t weights_old;
 			if (weights.stable != weights_old.stable) {
 				cmd_set_line(1);
 				cmd_set_text_color(0, 15, 0);
 				if (weights.stable == initial) {
-					pc.printf("stable: %d, weight: ---\n", weights.stable);
+					printf2("stable: %d, weight: ---\n", weights.stable);
 					sprintf(str, "NOW:---kg\n");
 					cmd_print_text(str);
 				} else {
-					pc.printf("stable: %d, weight: %f\n", weights.stable,
+					printf2("stable: %d, weight: %f\n", weights.stable,
 							weights.weight);
 					sprintf(str, "NOW:%3.0fkg\n", weights.weight);
 					cmd_print_text(str);
@@ -95,8 +88,7 @@ static void com_main() {
 						if (weights.weight < target_weight) {
 							NotifyDietAchieved(weights.weight, target_weight);
 						} else {
-							NotifyDietNotAchieved(weights.weight, target_weight,
-									weights.weight - target_weight);
+							NotifyDietNotAchieved(weights.weight, target_weight, weights.weight - target_weight);
 						}
 					}
 				}
@@ -109,11 +101,11 @@ static void com_main() {
 			if (door_open_old != door_open) {
 				if (door_open == false) {
 					cmd_lamp(false);
-					pc.printf("door close\n");
+					printf2("door close\n");
 					set_state(LOCKED);
 				} else {
 					cmd_lamp(true);
-					pc.printf("door open\n");
+					printf2("door open\n");
 				}
 			}
 			door_open_old = door_open;
@@ -125,14 +117,17 @@ static void com_main() {
 
 		{
 			int target_weight_int = target_weight;
-			static int target_weight_old = 100;
+			static int target_weight_old = 0;
 
 			if (target_weight_int != target_weight_old) {
 				cmd_set_line(0);
 				cmd_set_text_color(0, 15, 0);
 				sprintf(str, "GOAL:%3.0fkg\n", target_weight);
 				cmd_print_text(str);
-				NotifyChangeTarget(target_weight_old, target_weight_int);
+
+				if (target_weight_old != 0) {
+					NotifyChangeTarget(target_weight_old, target_weight_int);
+				}
 			}
 			target_weight_old = target_weight_int;
 		}
@@ -147,21 +142,21 @@ static void keypadEvent(keymat_t *key_data, weight_t *weights) {
 	char *guess2;
 	switch (key_data->state) {
 	case push:
-		pc.printf("Pressed: ");
-		pc.printf("%c\n", key_data->key);
+		printf2("Pressed: ");
+		printf2("%c\n", key_data->key);
 
 		switch (key_data->key) {
 		case '*':
 			guess2 = password.getGuess();
 			if (guess2[0] == '0' && guess2[1] == '0') {
 				target_weight = atoi(&guess2[2]);
-				pc.printf("Weight Set: %3.1f\n", target_weight);
+				printf2("Weight Set: %3.1f\n", target_weight);
 			} else if (guess2[0] == '0') {
 				password.set(&guess2[1]);
-				pc.printf("Password Set: %s\n", password.getPassword());
+				printf2("Password Set: %s\n", password.getPassword());
 			} else {
-				pc.printf("Guess Get: %s\n", password.getGuess());
-				pc.printf("Password Get: %s\n", password.getPassword());
+				printf2("Guess Get: %s\n", password.getGuess());
+				printf2("Password Get: %s\n", password.getPassword());
 				checkPassword(weights);
 			}
 			password.reset();
@@ -212,32 +207,32 @@ static void unlock_failed(uint8_t pattern) {
 
 	switch (pattern) {
 	case 0:
-		pc.printf("Password is incorrect\n");
+		printf2("Password is incorrect\n");
 
 		sprintf(str, "INCORRECT\n");
 		cmd_print_text(str);
 		NotifyUnlockFailedInvalidPass();
 		break;
 	case 1:
-		pc.printf("Weight is initial\n");
+		printf2("Weight is initial\n");
 
 		sprintf(str, "INITIAL\n");
 		cmd_print_text(str);
 		break;
 	case 2:
-		pc.printf("Target weight unachieved\n");
+		printf2("Target weight unachieved\n");
 
 		sprintf(str, "DO DIET\n");
 		cmd_print_text(str);
 		NotifyUnlockFailedDoDiet();
 		break;
 	}
-	pc.printf("Unlock failed\n");
+	printf2("Unlock failed\n");
 }
 
 static void kaiten_stop() {
 	char str[50];
-	pc.printf("kaiten_stop\n");
+	printf2("kaiten_stop\n");
 
 	cmd_kaiten_lamp(0, false);
 
@@ -248,20 +243,20 @@ static void kaiten_stop() {
 }
 
 static void INIT_init() {
-	pc.printf("INIT_init\n");
+	printf2("INIT_init\n");
 }
 
 static void INIT_do() {
-//	pc.printf("INIT_do\n");
+//	printf2("INIT_do\n");
 }
 
 static void INIT_end() {
-	pc.printf("INIT_end\n");
+	printf2("INIT_end\n");
 }
 
 static void LOCKED_init() {
 	char str[50];
-	pc.printf("LOCKED_init\n");
+	printf2("LOCKED_init\n");
 
 	cmd_kaiten_lamp(0, false);
 	cmd_servo(150, 10);
@@ -274,20 +269,20 @@ static void LOCKED_init() {
 }
 
 static void LOCKED_do() {
-//	pc.printf("LOCKED_do\n");
+//	printf2("LOCKED_do\n");
 }
 
 static void LOCKED_end() {
-	pc.printf("LOCKED_end\n");
+	printf2("LOCKED_end\n");
 }
 
 static void UNLOCKED_init() {
 	char str[50];
-	pc.printf("UNLOCKED_init\n");
+	printf2("UNLOCKED_init\n");
 
 	cmd_servo(70, 10);
 
-	pc.printf("Target weight achieved\n");
+	printf2("Target weight achieved\n");
 
 	cmd_set_line(3);
 	cmd_set_text_color(0, 15, 0);
@@ -297,32 +292,32 @@ static void UNLOCKED_init() {
 }
 
 static void UNLOCKED_do() {
-//	pc.printf("UNLOCKED_do\n");
+//	printf2("UNLOCKED_do\n");
 }
 
 static void UNLOCKED_end() {
-	pc.printf("UNLOCKED_end\n");
+	printf2("UNLOCKED_end\n");
 }
 
 static void SETTING_init() {
-	pc.printf("SETTING_init\n");
+	printf2("SETTING_init\n");
 }
 
 static void SETTING_do() {
-//	pc.printf("SETTING_do\n");
+//	printf2("SETTING_do\n");
 }
 
 static void SETTING_end() {
-	pc.printf("SETTING_end\n");
+	printf2("SETTING_end\n");
 }
 
 //I2C master(I2C_SDA, I2C_SCL);
 //int main()
 //{
-//    pc.printf("RUN\r\n");
+//    printf2("RUN\r\n");
 //    for(int i = 0; i < 128 ; i++) {
 //    	master.start();
-//        if(master.write(i << 1)) pc.printf("0x%x ACK \r\n",i); // Send command string
+//        if(master.write(i << 1)) printf2("0x%x ACK \r\n",i); // Send command string
 //        master.stop();
 //    }
 //}
