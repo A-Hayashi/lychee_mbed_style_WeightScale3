@@ -9,6 +9,7 @@ CPP_SRCS += \
 ../I2C_Comm.cpp \
 ../PS_PAD.cpp \
 ../Password.cpp \
+../PrintfWrapper.cpp \
 ../StateMachine.cpp \
 ../ThingSpeak.cpp \
 ../Weight.cpp \
@@ -20,6 +21,7 @@ OBJS += \
 ./I2C_Comm.o \
 ./PS_PAD.o \
 ./Password.o \
+./PrintfWrapper.o \
 ./StateMachine.o \
 ./ThingSpeak.o \
 ./Weight.o \
@@ -31,6 +33,7 @@ CPP_DEPS += \
 ./I2C_Comm.d \
 ./PS_PAD.d \
 ./Password.d \
+./PrintfWrapper.d \
 ./StateMachine.d \
 ./ThingSpeak.d \
 ./Weight.d \

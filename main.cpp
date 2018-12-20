@@ -3,11 +3,7 @@
 #include "I2C_Comm.h"
 #include "StateMachine.h"
 #include "ThingSpeak.h"
-#include <stdio.h>
-#include <string>
-
-
-
+#include "PrintfWrapper.h"
 
 static void INIT_init();
 static void INIT_do();
@@ -32,15 +28,21 @@ static state_func_t state_function[4] = { { INIT_init, INIT_do, INIT_end }, {
 		LOCKED_init, LOCKED_do, LOCKED_end }, { UNLOCKED_init, UNLOCKED_do,
 		UNLOCKED_end }, { SETTING_init, SETTING_do, SETTING_end }, };
 
-Serial pc(USBTX, USBRX);
-
-#define pc oled
 Password password = Password("1234");
 EventQueue queue;
-
+static Serial pc(USBTX, USBRX);
 float target_weight = 100;
 
 int main() {
+	printf2("start\n");
+	while (true) {
+		printf2("%s", "1aaabbbccc\n");
+		printf2("%s", "2aaabbbccc\n");
+		printf2("%s", "3aaabbbccc\n");
+		printf2("%s", "4aaabbbccc\n");
+		printf2("%s", "5aaabbbccc\n");
+		printf2("%s", "6aaabbbccc\n");
+	}
 	Thread com_main_task(osPriorityNormal, 500 * 1024);
 
 	com_main_task.start(&com_main);
@@ -88,12 +90,13 @@ static void com_main() {
 					sprintf(str, "NOW:%3.0fkg\n", weights.weight);
 					cmd_print_text(str);
 
-					if (weights.stable == determined){
+					if (weights.stable == determined) {
 						ChannelUpdate(weights.weight, target_weight);
-						if(weights.weight<target_weight){
+						if (weights.weight < target_weight) {
 							NotifyDietAchieved(weights.weight, target_weight);
-						}else{
-							NotifyDietNotAchieved(weights.weight, target_weight, weights.weight-target_weight);
+						} else {
+							NotifyDietNotAchieved(weights.weight, target_weight,
+									weights.weight - target_weight);
 						}
 					}
 				}
@@ -135,7 +138,6 @@ static void com_main() {
 		}
 
 		state_main();
-		oled.display();
 		Thread::wait(300);
 	}
 }
@@ -313,7 +315,6 @@ static void SETTING_do() {
 static void SETTING_end() {
 	pc.printf("SETTING_end\n");
 }
-
 
 //I2C master(I2C_SDA, I2C_SCL);
 //int main()
